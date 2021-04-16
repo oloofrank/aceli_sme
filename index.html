@@ -56,7 +56,7 @@
 				}
 
 				
-
+                                var ea_country = new L.geoJSON(ea, {style: eastyle}).addTo(map);
 				var protected_area = new L.geoJSON(protected, {style: prtstyle, 
 					onEachFeature: function (feature, layer){
 						layer.bindPopup("<table><tr><td><b>Name:</b>"+feature.properties.NAME+"</td></tr>\
@@ -82,7 +82,7 @@
 						return circle;
 					},
 				}).addTo(map);
-				var ea_country = new L.geoJSON(ea, {style: eastyle}).addTo(map);
+				
 
 				L.control.layers({"CartoDB": CartoDB, "OSM": osm}, {"SMEs":smesite,"Protected Areas": protected_area,"EA Boundary": ea_country}, {'position':'topright', collapsed: false}).addTo(map);
 
