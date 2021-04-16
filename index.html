@@ -1,0 +1,113 @@
+	<!DOCTYPE html>
+	<html>
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"; charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>ACELI Africa: Proximity of SMEs to Protected Areas</title>
+
+		<!-- adding leaflet css and js files-->
+		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+	   			integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+	   			crossorigin=""/>
+
+	   	<link rel="stylesheet" href="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.css" />
+		<link rel="icon" href="assets/img/aceli-logo-150x150.png" sizes="32x32" />
+        <link rel="apple-touch-icon" href="assets/img/aceli-logo-150x150.png" sizes="150x150" />
+		
+		<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+	   			integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+	   			crossorigin=""></script>
+	   	<script src="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.js"></script>
+
+		<!-- add world country file. Dont forget to modify the file by adding variable name before data = {} -->
+		<script type="text/javascript" src="data/east_africa.geojson"></script>
+		<script type="text/javascript" src="data/protected_area.geojson"></script>
+		<script type="text/javascript" src="data/sme_site.geojson"></script>
+		<script type="text/javascript" src="data/measure_options.json"></script>
+
+
+		<script type="text/javascript">
+
+			function init() {
+				// set the centre and zoom level 
+				var map = new L.map('mapid').setView([-3.4, 35.2176], 6);
+				// add basemaps from cartodb - darkmatter. 
+				var CartoDB = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png', {
+					attribution: '&copy; foloo, &copy; bmitto, &copy; geopsy-research, contributors: <a href="http://cartodb.com/attributions#basemaps">CartoDB</a>',
+					subdomains:'abcd',
+					minZoom:2, 
+					maxZoom:20
+				}).addTo(map);
+				// add the second basemap from OSM
+		        var osm = L.tileLayer ('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+		           	attribution: '&copy; OSM',
+		            minZoom: 2,
+		            maxZoom: 20
+		        });
+
+				var eastyle = {fillOpacity: 1, opacity: 1, weight: 2, color: 'black', fillColor: 'rgba(196,60,57,0.0)'};
+
+				var prtstyle = {fillOpacity: 0.8, weight: 0.1, color: 'white', fillColor: 'rgba(178,223,138,1.0)'};
+
+				function smestyle() {
+					return {
+						radius: 6.0, opacity: 1, color: 'rgba(255,255,255,1.0)', weight: 1, fillOpacity: 1, fillColor: 'rgba(158, 0, 49,1.0)'
+					}
+				}
+
+				
+
+				var protected_area = new L.geoJSON(protected, {style: prtstyle, 
+					onEachFeature: function (feature, layer){
+						layer.bindPopup("<table><tr><td><b>Name:</b>"+feature.properties.NAME+"</td></tr>\
+							<tr><td><b>Designation:</b>"+feature.properties.DESIG+"</td></tr>\
+							<tr><td><b>Status:</b>"+feature.properties.STATUS+"</td></tr></table>")
+				}}).addTo(map);
+
+				var smesite = new L.geoJSON(sme, {
+					pointToLayer: function(feature, latlng) {
+						var circle = L.circleMarker(latlng, smestyle(feature));
+
+						circle.bindPopup("<table><tr><td><b> SME Number</td><td>"+feature.properties.SME_No +"</td></tr>\
+							<tr><td><b> Lender</b></td><td>"+feature.properties.Lender+"</td></tr>\
+							<tr><td><b> Loanee</b></td><td><b>"+feature.properties.Loanee+"</b></td></tr>\
+							<tr><td><b> Value Chain</b></td><td>"+ feature.properties.Value_Chain+"</td></tr>\
+							<tr><td><b> Country</b></td><td>"+feature.properties.Country+"</td></tr>\
+							<tr><td><b> District</b></td><td>"+feature.properties.Country+"</td></tr>\
+							<tr><td><b> Ward</b></td><td>"+feature.properties.Country+"</td></tr>\
+							<tr><td><b> Nearest Protected Area</b></td><td>"+feature.properties.Nearest+"</td><td>"+feature.properties.Nearest_Dist+"km</td></tr>\
+							<tr><td><b> Second Protected Area</b></td><td>"+feature.properties.Second+"</td><td>"+feature.properties.Second_Dist+"km</td></tr>\
+							<tr><td><b> Third Protected Area</b></td><td>"+feature.properties.Third+"</td><td>"+feature.properties.Third_Dist+"km</td></tr>\
+							</table>");
+						return circle;
+					},
+				}).addTo(map);
+				var ea_country = new L.geoJSON(ea, {style: eastyle}).addTo(map);
+
+				L.control.layers({"CartoDB": CartoDB, "OSM": osm}, {"SMEs":smesite,"Protected Areas": protected_area,"EA Boundary": ea_country}, {'position':'topright', collapsed: false}).addTo(map);
+
+				L.control.polylineMeasure(options).addTo(map);
+
+			};
+
+
+		</script>
+
+		<style type="text/css">
+			table {
+				border: 1px solid black;
+				border-collapse: collapse;
+			}
+			td {
+				border: 1px solid black;
+			}
+		</style>
+	</head>
+	<body onload="init()">
+		<!-- set the div element and style the map -->
+
+		<div id="mapid" style="height: 800px; width: 96%; padding: 20px"></div>
+		<table id="properties"></table>
+
+	</body>
+	</html>
