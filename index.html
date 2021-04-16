@@ -81,7 +81,7 @@
 							</table>");
 						return circle;
 					},
-				}).addTo(map);
+				});
 				
 
 				L.control.layers({"CartoDB": CartoDB, "OSM": osm}, {"SMEs":smesite,"Protected Areas": protected_area,"EA Boundary": ea_country}, {'position':'topright', collapsed: false}).addTo(map);
